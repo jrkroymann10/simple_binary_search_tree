@@ -2,7 +2,7 @@ require 'pry'
 
 class Node
   include Comparable
-  attr_accessor :value, :left_child, :right_child
+  attr_accessor :value, :left_child, :right_child, :children
   def <=>(other)
     self.value <=> other.value
   end
@@ -10,6 +10,7 @@ class Node
     @value = value
     @left_child = left_child
     @right_child = right_child
+    @children = [left_child, right_child]
   end
 end
 
@@ -64,7 +65,94 @@ class Tree
     root
   end
 
+  def find(value, root = @root)
+    if @root.nil?
+      puts 'no such node with the given value'
+    elsif value == root.value
+      root
+    elsif value < root.value
+      find(value, root.left_child)
+    elsif value > root.value
+      find(value, root.right_child)
+    end
+  end
+
+  def level_order(queue = Queue.new.enq(@root))
+    until queue.empty?
+      node = queue.pop
+      queue << node.left_child unless node.left_child.nil?
+      queue << node.right_child unless node.right_child.nil?
+      puts node.value
+    end
+  end
+
+  def level_order_recursive(queue = Queue.new.enq(@root))
+    return queue if queue.empty?
+
+    node = queue.pop
+    yield node
+    queue << node.left_child unless node.left_child.nil?
+    queue << node.right_child unless node.right_child.nil?
+    level_order(queue)
+  end
+
+  # LDR - still need to allow for intake of block
+  def inorder(root = @root, ary = [])
+    return root if root.nil?
+
+    inorder(root.left_child, ary)
+    ary.push(root.value)
+    inorder(root.right_child, ary)
+    ary
+  end
+
+  # DLR
+  def preorder(root = @root, ary = [])
+    return root if root.nil?
+
+    ary.push(root.value)
+    preorder(root.left_child, ary)
+    preorder(root.right_child, ary)
+    ary
+  end
+
+  # LRD
+  def postorder(root = @root, ary = [])
+    return root if root.nil?
+
+    postorder(root.left_child, ary)
+    postorder(root.right_child, ary)
+    ary.push(root.value)
+    ary
+  end
+
+  # number of levels below a node
+  def depth(node, root = @root)
+    count = 0
+    until node == root
+      if node.value < root.value
+        root = root.left_child
+      elsif node.value > root.value
+        root = root.right_child
+      end
+      count += 1
+    end
+    count
+  end
+
+  def balanced?(root = @root)
+    left = find_height(root.left_child)
+    right = find_height(root.right_child)
+    [left, right].max - [left, right].min > 1 ? false : true
+  end
+
   private
+
+  def find_height(node)
+    return -1 if node.nil?
+
+    [find_height(node.left_child), find_height(node.right_child)].max + 1
+  end
 
   # Finding min in a subtree, left < right
   def find_min(root)
@@ -135,9 +223,21 @@ x = Tree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
 
 p x.root
 puts ''
-x.insert(2)
-x.insert(10)
-x.delete(4)
+x.level_order_recursive { |this_node| puts this_node.value }
 puts ''
+p x.inorder
+puts ''
+p x.preorder
+puts ''
+p x.postorder
+puts ''
+
+y = x.find(6345)
+
+puts x.depth(y)
+
 p x.root
 
+puts ''
+
+p x.balanced?
