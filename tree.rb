@@ -1,19 +1,3 @@
-require 'pry'
-
-class Node
-  include Comparable
-  attr_accessor :value, :left_child, :right_child, :children
-  def <=>(other)
-    self.value <=> other.value
-  end
-  def initialize(value, left_child = nil, right_child = nil)
-    @value = value
-    @left_child = left_child
-    @right_child = right_child
-    @children = [left_child, right_child]
-  end
-end
-
 class Tree
   attr_accessor :root
   def initialize(array)
@@ -229,38 +213,3 @@ class Tree
     new_array
   end
 end
-
-x = Tree.new(Array.new(15) { rand(1..100) })
-
-x.pretty_print
-puts ''
-p x.balanced?
-puts ''
-p x.level_order
-puts ''
-p x.preorder
-puts ''
-p x.postorder
-puts ''
-p x.inorder
-puts ''
-x.insert(101)
-x.insert(102)
-x.insert(103)
-x.insert(104)
-x.pretty_print
-puts ''
-p x.balanced?
-puts ''
-x.rebalance!
-x.pretty_print
-puts ''
-p x.balanced?
-puts ''
-p x.level_order
-puts ''
-p x.preorder
-puts ''
-p x.postorder
-puts ''
-p x.inorder
