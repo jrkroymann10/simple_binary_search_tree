@@ -29,12 +29,10 @@ class Tree
   end
 
   def insert(value, root = @root)
-    if root.left_child.nil? && root.right_child.nil?
-      if value < root.value
-        root.left_child = Node.new(value)
-      elsif value > root.value
-        root.right_child = Node.new(value)
-      end
+    if root.left_child.nil? && value < root.value
+      root.left_child = Node.new(value)
+    elsif root.right_child.nil? && value > root.value
+      root.right_child = Node.new(value)
     elsif value < root.value
       insert(value, root.left_child)
     elsif value > root.value
@@ -78,12 +76,14 @@ class Tree
   end
 
   def level_order(queue = Queue.new.enq(@root))
+    ary = []
     until queue.empty?
       node = queue.pop
       queue << node.left_child unless node.left_child.nil?
       queue << node.right_child unless node.right_child.nil?
-      puts node.value
+      ary.push(node.value)
     end
+    ary
   end
 
   def level_order_recursive(queue = Queue.new.enq(@root))
@@ -144,6 +144,17 @@ class Tree
     left = find_height(root.left_child)
     right = find_height(root.right_child)
     [left, right].max - [left, right].min > 1 ? false : true
+  end
+
+  def rebalance!
+    ary = level_order
+    @root = build_tree(ary)
+  end
+
+  def pretty_print(node = @root, prefix="", is_left = true)
+    pretty_print(node.right_child, "#{prefix}#{is_left ? "│ " : " "}", false) unless node.right_child.nil?
+    puts "#{prefix}#{is_left ? "└── " : "┌── "}#{node.value.to_s}"
+    pretty_print(node.left_child, "#{prefix}#{is_left ? " " : "│ "}", true) unless node.left_child.nil?
   end
 
   private
@@ -219,25 +230,37 @@ class Tree
   end
 end
 
-x = Tree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
+x = Tree.new(Array.new(15) { rand(1..100) })
 
-p x.root
+x.pretty_print
 puts ''
-x.level_order_recursive { |this_node| puts this_node.value }
+p x.balanced?
 puts ''
-p x.inorder
+p x.level_order
 puts ''
 p x.preorder
 puts ''
 p x.postorder
 puts ''
-
-y = x.find(6345)
-
-puts x.depth(y)
-
-p x.root
-
+p x.inorder
 puts ''
-
+x.insert(101)
+x.insert(102)
+x.insert(103)
+x.insert(104)
+x.pretty_print
+puts ''
 p x.balanced?
+puts ''
+x.rebalance!
+x.pretty_print
+puts ''
+p x.balanced?
+puts ''
+p x.level_order
+puts ''
+p x.preorder
+puts ''
+p x.postorder
+puts ''
+p x.inorder
